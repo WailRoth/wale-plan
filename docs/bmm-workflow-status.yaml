@@ -1,0 +1,73 @@
+# Workflow Status Template
+
+# This tracks progress through BMM methodology Analysis, Planning, and Solutioning phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/product-brief.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+generated: "2025-12-01"
+project: "wale-plan"
+project_type: "brownfield"
+selected_track: "method"
+field_type: "brownfield"
+workflow_path: ".bmad/bmm/workflows/workflow-status/paths/method-brownfield.yaml"
+workflow_status: |
+  prerequisite:
+    document-project:
+      status: required
+      agent: analyst
+      command: document-project
+  phase_0_discovery:
+    brainstorm-project:
+      status: completed
+      agent: analyst
+      command: brainstorm-project
+      file: "docs/analysis/brainstorming-session-2025-12-01.md"
+      summary: "Comprehensive Decision Tree Mapping for both resource management and task management workflows, complete with cross-system integration design"
+    research:
+      status: optional
+      agent: analyst
+      command: research
+  phase_1_planning:
+    prd:
+      status: completed
+      agent: pm
+      command: prd
+      file: "docs/prd.md"
+      completed: "2025-12-01T18:00:00.000Z"
+    create-ux-design:
+      status: conditional
+      agent: ux-designer
+      command: create-ux-design
+  phase_2_solutioning:
+    create-architecture:
+      status: recommended
+      agent: architect
+      command: create-architecture
+    create-epics-and-stories:
+      status: required
+      agent: pm
+      command: create-epics-and-stories
+    test-design:
+      status: recommended
+      agent: tea
+      command: test-design
+    implementation-readiness:
+      status: required
+      agent: architect
+      command: implementation-readiness
+  phase_3_implementation:
+    sprint-planning:
+      status: required
+      agent: sm
+      command: sprint-planning
