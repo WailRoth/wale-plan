@@ -2,7 +2,6 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
-  pgTable,
   pgTableCreator,
   text,
   timestamp,
@@ -37,7 +36,7 @@ export const posts = createTable(
   ],
 );
 
-export const user = pgTable("user", {
+export const user = createTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -53,7 +52,7 @@ export const user = pgTable("user", {
     .notNull(),
 });
 
-export const session = pgTable("session", {
+export const session = createTable("session", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
   token: text("token").notNull().unique(),
@@ -66,7 +65,7 @@ export const session = pgTable("session", {
     .references(() => user.id, { onDelete: "cascade" }),
 });
 
-export const account = pgTable("account", {
+export const account = createTable("account", {
   id: text("id").primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
@@ -84,7 +83,7 @@ export const account = pgTable("account", {
   updatedAt: timestamp("updated_at").notNull(),
 });
 
-export const verification = pgTable("verification", {
+export const verification = createTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
@@ -265,7 +264,6 @@ export const tasks = createTable(
 export const taskDependencies = createTable(
   "task_dependency",
   (d) => ({
-    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
     predecessorId: d
       .integer("predecessor_id")
       .notNull()
@@ -282,14 +280,14 @@ export const taskDependencies = createTable(
       .notNull(),
   }),
   (t) => [
-    index("task_dep_predecessor_idx").on(t.predecessorId),
-    index("task_dep_successor_idx").on(t.successorId),
-    index("task_dep_type_idx").on(t.dependencyType),
-    // Prevent duplicate dependencies
+    // Composite primary key prevents duplicate dependencies between same predecessor and successor
     primaryKey({
       columns: [t.predecessorId, t.successorId],
       name: "task_dep_unique",
     }),
+    index("task_dep_type_idx").on(t.dependencyType),
+    index("task_dep_predecessor_idx").on(t.predecessorId),
+    index("task_dep_successor_idx").on(t.successorId),
   ],
 );
 
@@ -373,6 +371,141 @@ export const baselineTasks = createTable(
   ],
 );
 
+// Enhanced Resource Scheduling Tables
+
+// Resource Work Schedules - Day-specific work patterns
+export const resourceWorkSchedules = createTable(
+  "resource_work_schedule",
+  (d) => ({
+    resourceId: d
+      .integer("resource_id")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    dayOfWeek: d.integer().notNull(), // 0-6 (Sunday=0 or Monday=0 based on preference)
+    dayType: d.varchar({ length: 20 }).notNull().default("regular"), // regular, weekend, holiday, custom
+    isWorkingDay: d.boolean().default(true).notNull(),
+    workStartTime: d.time(), // e.g., "09:00:00"
+    workEndTime: d.time(), // e.g., "17:00:00"
+    breakStartTime: d.time(), // e.g., "12:00:00"
+    breakEndTime: d.time(), // e.g., "13:00:00"
+    totalWorkHours: d.numeric({ precision: 4, scale: 2 }), // Calculated work hours for this day
+    hourlyRate: d.numeric({ precision: 10, scale: 2 }), // Can vary by day type
+    currency: d.varchar({ length: 3 }).default("USD"),
+    isActive: d.boolean().default(true).notNull(),
+    createdAt: d
+      .timestamp({ withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+  }),
+  (t) => [
+    // Composite primary key ensures unique combination of resource and day
+    primaryKey({
+      columns: [t.resourceId, t.dayOfWeek],
+      name: "resource_schedule_unique",
+    }),
+    index("resource_schedule_type_idx").on(t.dayType),
+    index("resource_schedule_active_idx").on(t.isActive),
+  ],
+);
+
+// Resource Availability - Non-working periods and vacations
+export const resourceAvailability = createTable(
+  "resource_availability",
+  (d) => ({
+    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+    resourceId: d
+      .integer("resource_id")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    startDate: d.date().notNull(),
+    endDate: d.date().notNull(),
+    availabilityType: d.varchar({ length: 20 }).notNull(), // vacation, sick_leave, holiday, training, unavailable
+    description: d.text(),
+    isFullDay: d.boolean().default(true).notNull(), // If false, specific times apply
+    startTime: d.time(), // Only used if isFullDay is false
+    endTime: d.time(), // Only used if isFullDay is false
+    isRecurring: d.boolean().default(false).notNull(),
+    recurringPattern: d.varchar({ length: 50 }), // daily, weekly, monthly, yearly
+    recurringEndDate: d.date(), // When recurring pattern ends
+    timeZone: d.varchar({ length: 50 }), // Time zone for availability periods
+    isActive: d.boolean().default(true).notNull(),
+    createdAt: d
+      .timestamp({ withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+  }),
+  (t) => [
+    index("resource_availability_resource_idx").on(t.resourceId),
+    index("resource_availability_dates_idx").on(t.startDate, t.endDate),
+    index("resource_availability_type_idx").on(t.availabilityType),
+    index("resource_availability_active_idx").on(t.isActive),
+  ],
+);
+
+// Resource Time Zones - Store time zone information per resource
+export const resourceTimeZones = createTable(
+  "resource_time_zone",
+  (d) => ({
+    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+    resourceId: d
+      .integer("resource_id")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    timeZone: d.varchar({ length: 50 }).notNull(), // IANA time zone identifier (e.g., "America/New_York")
+    utcOffset: d.varchar({ length: 6 }), // e.g., "-05:00", "+01:00"
+    isDST: d.boolean().default(false).notNull(), // Observes Daylight Saving Time
+    isActive: d.boolean().default(true).notNull(),
+    effectiveDate: d.date().notNull().defaultNow(), // When this time zone became effective
+    createdAt: d
+      .timestamp({ withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+  }),
+  (t) => [
+    index("resource_timezone_resource_idx").on(t.resourceId),
+    index("resource_timezone_active_idx").on(t.isActive),
+    index("resource_timezone_effective_idx").on(t.effectiveDate),
+  ],
+);
+
+// Dynamic Pricing Tables for variable rates by workday type
+export const resourceDayTypeRates = createTable(
+  "resource_day_type_rate",
+  (d) => ({
+    resourceId: d
+      .integer("resource_id")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    dayType: d.varchar({ length: 20 }).notNull(), // regular, overtime, weekend, holiday
+    baseHourlyRate: d.numeric({ precision: 10, scale: 2 }).notNull(),
+    overtimeMultiplier: d.numeric({ precision: 4, scale: 2 }).default("1.5"), // e.g., 1.5x for overtime
+    currency: d.varchar({ length: 3 }).default("USD"),
+    minimumHours: d.numeric({ precision: 4, scale: 2 }).default("0"), // Minimum hours for this rate
+    maximumHours: d.numeric({ precision: 4, scale: 2 }), // Maximum hours before next rate tier
+    effectiveDate: d.date().notNull().defaultNow(),
+    expiryDate: d.date(), // When this rate expires (null = no expiry)
+    isActive: d.boolean().default(true).notNull(),
+    createdAt: d
+      .timestamp({ withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+  }),
+  (t) => [
+    // Composite primary key ensures unique combination of resource, day type, and effective date
+    primaryKey({
+      columns: [t.resourceId, t.dayType, t.effectiveDate],
+      name: "resource_rate_unique",
+    }),
+    index("resource_rate_day_type_idx").on(t.dayType),
+    index("resource_rate_effective_idx").on(t.effectiveDate),
+    index("resource_rate_active_idx").on(t.isActive),
+  ],
+);
+
 // Time Entries for actual time tracking
 export const timeEntries = createTable(
   "time_entry",
@@ -394,8 +527,12 @@ export const timeEntries = createTable(
     startTime: d.time(),
     endTime: d.time(),
     hours: d.numeric({ precision: 4, scale: 2 }).notNull(),
-    description: d.text(),
+    dayType: d.varchar({ length: 20 }).notNull().default("regular"), // Track what type of day this was
+    hourlyRate: d.numeric({ precision: 10, scale: 2 }), // Actual rate used (can vary by day type)
     cost: d.numeric({ precision: 10, scale: 2 }),
+    timeZone: d.varchar({ length: 50 }), // Time zone of the time entry
+    isOvertime: d.boolean().default(false).notNull(),
+    description: d.text(),
     createdAt: d
       .timestamp({ withTimezone: true })
       .$defaultFn(() => new Date())
@@ -407,6 +544,8 @@ export const timeEntries = createTable(
     index("time_entry_resource_idx").on(t.resourceId),
     index("time_entry_user_idx").on(t.userId),
     index("time_entry_date_idx").on(t.date),
+    index("time_entry_day_type_idx").on(t.dayType),
+    index("time_entry_overtime_idx").on(t.isOvertime),
   ],
 );
 
@@ -448,6 +587,10 @@ export const resourceRelations = relations(resources, ({ one, many }) => ({
   }),
   assignments: many(resourceAssignments),
   timeEntries: many(timeEntries),
+  workSchedules: many(resourceWorkSchedules),
+  availabilityPeriods: many(resourceAvailability),
+  timeZones: many(resourceTimeZones),
+  dayTypeRates: many(resourceDayTypeRates),
 }));
 
 export const taskRelations = relations(tasks, ({ one, many }) => ({
@@ -529,6 +672,36 @@ export const timeEntryRelations = relations(timeEntries, ({ one }) => ({
   user: one(user, {
     fields: [timeEntries.userId],
     references: [user.id],
+  }),
+}));
+
+// Relations for Enhanced Resource Scheduling Tables
+
+export const resourceWorkScheduleRelations = relations(resourceWorkSchedules, ({ one }) => ({
+  resource: one(resources, {
+    fields: [resourceWorkSchedules.resourceId],
+    references: [resources.id],
+  }),
+}));
+
+export const resourceAvailabilityRelations = relations(resourceAvailability, ({ one }) => ({
+  resource: one(resources, {
+    fields: [resourceAvailability.resourceId],
+    references: [resources.id],
+  }),
+}));
+
+export const resourceTimeZoneRelations = relations(resourceTimeZones, ({ one }) => ({
+  resource: one(resources, {
+    fields: [resourceTimeZones.resourceId],
+    references: [resources.id],
+  }),
+}));
+
+export const resourceDayTypeRateRelations = relations(resourceDayTypeRates, ({ one }) => ({
+  resource: one(resources, {
+    fields: [resourceDayTypeRates.resourceId],
+    references: [resources.id],
   }),
 }));
 

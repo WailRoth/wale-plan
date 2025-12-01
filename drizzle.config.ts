@@ -6,7 +6,8 @@ export default {
   schema: "./src/server/db/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
+    ssl: false,
     url: env.DATABASE_URL,
   },
-  tablesFilter: ["wale-plan_*"],
+  tablesFilter: ["pg-drizzle_*"],
 } satisfies Config;
