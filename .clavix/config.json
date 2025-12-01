@@ -1,0 +1,21 @@
+{
+  "version": "5.7.0",
+  "integrations": [
+    "agents-md",
+    "claude-code",
+    "kilocode"
+  ],
+  "templates": {
+    "prdQuestions": "default",
+    "fullPrd": "default",
+    "quickPrd": "default"
+  },
+  "outputs": {
+    "path": ".clavix/outputs",
+    "format": "markdown"
+  },
+  "preferences": {
+    "autoOpenOutputs": false,
+    "verboseLogging": false
+  }
+}
