@@ -49,6 +49,12 @@ workflow_status: |
       status: conditional
       agent: ux-designer
       command: create-ux-design
+    create-tech-spec:
+      status: completed
+      agent: tech-writer
+      command: create-tech-spec
+      file: "docs/tech-spec.md"
+      completed: "2025-12-01T18:15:00.000Z"
   phase_2_solutioning:
     create-architecture:
       status: recommended
