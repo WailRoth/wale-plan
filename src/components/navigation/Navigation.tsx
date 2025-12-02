@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-import { User, LogOut, Settings, BarChart3, Building, Folder } from "lucide-react";
+import { User, LogOut, Settings, BarChart3, Building, Folder, Users } from "lucide-react";
 import { CompactProjectNavigation } from "~/components/projects/ProjectNavigation";
 import { useOrganization } from "~/lib/organization/context";
 
@@ -81,6 +81,13 @@ export function Navigation() {
               </Button>
             </Link>
 
+            <Link href="/dashboard/resources">
+              <Button variant="ghost" className="flex items-center space-x-2">
+                <Users className="h-4 w-4" />
+                <span>Resources</span>
+              </Button>
+            </Link>
+
             {/* Project Navigation */}
             {currentOrganization && (
               <div className="border-l pl-4 ml-4">
@@ -133,6 +140,12 @@ export function Navigation() {
                   <Link href="/dashboard/projects" className="flex items-center space-x-2 w-full">
                     <Folder className="h-4 w-4" />
                     <span>Projects</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/resources" className="flex items-center space-x-2 w-full">
+                    <Users className="h-4 w-4" />
+                    <span>Resources</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

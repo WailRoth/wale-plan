@@ -44,8 +44,8 @@ development_status:
   epic-1-retrospective: optional
 
   # Epic 2: Advanced Resource Management System
-  epic-2: backlog
-  2-1-resource-creation-and-basic-configuration: backlog
+  epic-2: in-progress
+  2-1-resource-creation-and-basic-configuration: review
   2-2-day-specific-availability-patterns: backlog
   2-3-one-time-availability-exceptions: backlog
   2-4-resource-timeline-visualization: backlog

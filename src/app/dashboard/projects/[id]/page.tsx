@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Navigation } from "~/components/navigation/Navigation";
 import { Badge } from "~/components/ui/badge";
 import { api } from "~/trpc/react";
-import { ArrowLeft, Folder, Calendar, Users, Settings } from "lucide-react";
+import { ArrowLeft, Folder, Calendar, Users, Settings, ArrowRight } from "lucide-react";
 import { useOrganization } from "~/lib/organization/context";
 import { toast } from "~/components/ui/toast/use-toast";
 
@@ -206,7 +206,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 </CardContent>
               </Card>
 
-              {/* Resources Placeholder */}
+              {/* Resources */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -220,10 +220,17 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 <CardContent>
                   <div className="text-center py-8">
                     <div className="text-muted-foreground">
-                      <p className="mb-4">Resource management coming soon</p>
-                      <p className="text-sm">
-                        You'll be able to assign team members and manage resources here.
+                      <p className="mb-4">Manage your project resources</p>
+                      <p className="text-sm mb-4">
+                        View and manage team members, materials, and equipment available for this project.
                       </p>
+                      <Link href="/dashboard/resources">
+                        <Button className="mt-2">
+                          <Users className="mr-2 h-4 w-4" />
+                          Manage Resources
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
