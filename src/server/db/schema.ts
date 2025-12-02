@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -11,6 +11,7 @@ import {
   time,
   primaryKey,
   numeric,
+  json,
 } from "drizzle-orm/pg-core";
 
 export const createTable = pgTableCreator((name) => `pg-drizzle_${name}`);
@@ -179,6 +180,15 @@ export const projects = createTable(
     status: d.varchar({ length: 50 }).notNull().default("planning"), // planning, active, completed, archived
     startDate: d.date(),
     endDate: d.date(),
+    // Calendar settings for project
+    workingDays: d.text("working_days").array().notNull().default(sql`'{"Mon","Tue","Wed","Thu","Fri"}'::text[]`), // Default working days
+    workingHours: d.json("working_hours").$type<Record<string, { start: string; end: string }>>().$default(() => ({
+      monday: { start: "09:00", end: "17:00" },
+      tuesday: { start: "09:00", end: "17:00" },
+      wednesday: { start: "09:00", end: "17:00" },
+      thursday: { start: "09:00", end: "17:00" },
+      friday: { start: "09:00", end: "17:00" },
+    })),
     createdAt: d
       .timestamp({ withTimezone: true })
       .$defaultFn(() => new Date())
@@ -189,6 +199,7 @@ export const projects = createTable(
     index("project_org_idx").on(t.organizationId),
     index("project_status_idx").on(t.status),
     index("project_name_idx").on(t.name),
+    index("project_working_days_idx").on(t.workingDays),
   ],
 );
 

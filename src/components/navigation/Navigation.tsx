@@ -12,10 +12,22 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-import { User, LogOut, Settings, BarChart3, Building } from "lucide-react";
+import { User, LogOut, Settings, BarChart3, Building, Folder } from "lucide-react";
+import { CompactProjectNavigation } from "~/components/projects/ProjectNavigation";
+import { useOrganization } from "~/lib/organization/context";
 
 export function Navigation() {
   const { session, signOut, isLoading } = useAuth();
+
+  // Only use organization context if available (on dashboard pages with OrganizationProvider)
+  let currentOrganization = null;
+  try {
+    const organizationContext = useOrganization();
+    currentOrganization = organizationContext?.currentOrganization || null;
+  } catch {
+    // OrganizationProvider not available, this is expected on public pages (like landing page)
+    currentOrganization = null;
+  }
 
   if (isLoading) {
     return (
@@ -62,6 +74,26 @@ export function Navigation() {
               </Button>
             </Link>
 
+            <Link href="/dashboard/projects">
+              <Button variant="ghost" className="flex items-center space-x-2">
+                <Folder className="h-4 w-4" />
+                <span>Projects</span>
+              </Button>
+            </Link>
+
+            {/* Project Navigation */}
+            {currentOrganization && (
+              <div className="border-l pl-4 ml-4">
+                <CompactProjectNavigation
+                  organizationId={currentOrganization.id}
+                  onProjectChange={(projectId) => {
+                    // Navigate to project-specific dashboard
+                    window.location.href = `/dashboard/projects/${projectId}`;
+                  }}
+                />
+              </div>
+            )}
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -95,6 +127,12 @@ export function Navigation() {
                   <Link href="/dashboard/organizations" className="flex items-center space-x-2 w-full">
                     <Building className="h-4 w-4" />
                     <span>Organizations</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/projects" className="flex items-center space-x-2 w-full">
+                    <Folder className="h-4 w-4" />
+                    <span>Projects</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
