@@ -1,0 +1,78 @@
+# generated: 2025-12-02
+# project: wale-plan
+# project_key: wale-plan
+# tracking_system: file-system
+# story_location: /home/adumain/dev/wale-plan/docs/sprint-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Epic tech context created (required before drafting stories)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Under SM review (via code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
+
+generated: 2025-12-02
+project: wale-plan
+project_key: wale-plan
+tracking_system: file-system
+story_location: /home/adumain/dev/wale-plan/docs/sprint-artifacts
+
+development_status:
+  # Epic 1: Foundation Setup & User Workspace
+  epic-1: backlog
+  1-1-user-authentication-system: review
+  1-2-organization-management-setup: backlog
+  1-3-project-creation-and-management: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: Advanced Resource Management System
+  epic-2: backlog
+  2-1-resource-creation-and-basic-configuration: backlog
+  2-2-day-specific-availability-patterns: backlog
+  2-3-one-time-availability-exceptions: backlog
+  2-4-resource-timeline-visualization: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: Task Management & Dependency Engine
+  epic-3: backlog
+  3-1-task-creation-and-hierarchy: backlog
+  3-2-task-dependency-management: backlog
+  3-3-task-assignment-and-resource-linking: backlog
+  3-4-task-constraints-and-scheduling-types: backlog
+  3-5-task-progress-tracking: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Intelligent Scheduling Engine
+  epic-4: backlog
+  4-1-manual-schedule-recalculation: backlog
+  4-2-scheduling-conflict-detection: backlog
+  4-3-resource-aware-scheduling: backlog
+  4-4-schedule-undo-functionality: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Interactive User Interface
+  epic-5: backlog
+  5-1-interactive-task-table: backlog
+  5-2-interactive-resource-table: backlog
+  5-3-gantt-chart-visualization: backlog
+  5-4-calendar-resource-view: backlog
+  5-5-project-calendar-management: backlog
+  epic-5-retrospective: optional

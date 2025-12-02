@@ -1,43 +1,25 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { authClient } from "~/server/better-auth/client";
-import { getSession } from "~/server/better-auth/server";
+import { Navigation } from "~/components/navigation/Navigation";
+import { auth } from "~/lib/auth/config";
 
 export default async function DashboardPage() {
-  const session = await getSession();
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
 
   if (!session) {
-    redirect("/auth");
+    redirect("/login");
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-3xl font-bold tracking-tight">Wale Plan</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">
-                Welcome, {session.user?.name}
-              </span>
-              <form action={async () => {
-                "use server";
-                await authClient.signOut();
-                redirect("/auth");
-              }}>
-                <Button variant="outline" size="sm" type="submit">
-                  Sign out
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Use our consistent Navigation component */}
+      <Navigation />
 
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">

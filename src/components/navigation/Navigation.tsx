@@ -1,0 +1,114 @@
+"use client";
+
+import Link from "next/link";
+import { useAuth } from "~/components/auth/AuthProvider";
+import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { User, LogOut, Settings, BarChart3 } from "lucide-react";
+
+export function Navigation() {
+  const { session, signOut, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <nav className="container mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="text-2xl font-bold text-gray-900">wale-plan</div>
+          <div className="w-24 h-9 bg-gray-200 animate-pulse rounded"></div>
+        </div>
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="container mx-auto px-6 py-4">
+      <div className="flex items-center justify-between">
+        <Link href="/" className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
+          wale-plan
+        </Link>
+
+        {!session ? (
+          // Non-authenticated navigation
+          <div className="flex items-center space-x-4">
+            <Link href="/login">
+              <Button variant="ghost">Sign In</Button>
+            </Link>
+            <Link href="/register">
+              <Button>Sign Up</Button>
+            </Link>
+          </div>
+        ) : (
+          // Authenticated navigation
+          <div className="flex items-center space-x-4">
+            <Link href="/dashboard">
+              <Button variant="ghost" className="flex items-center space-x-2">
+                <BarChart3 className="h-4 w-4" />
+                <span>Dashboard</span>
+              </Button>
+            </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-blue-600 text-white">
+                      {session.user.name?.charAt(0).toUpperCase() ||
+                       session.user.email?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {session.user.name || 'User'}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {session.user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard" className="flex items-center space-x-2 w-full">
+                    <BarChart3 className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="flex items-center space-x-2 w-full">
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="flex items-center space-x-2 w-full">
+                    <User className="h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={signOut}
+                  className="flex items-center space-x-2 text-red-600 focus:text-red-600"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+}

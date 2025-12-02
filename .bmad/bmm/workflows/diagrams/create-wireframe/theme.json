@@ -1,0 +1,47 @@
+{
+  "name": "wale-plan-professional-minimal",
+  "description": "Professional minimal theme optimized for project management data visualization",
+  "colors": {
+    "background": "#F8FAFC",
+    "container": "#FFFFFF",
+    "border": "#E2E8F0",
+    "text": {
+      "primary": "#1E293B",
+      "secondary": "#64748B",
+      "muted": "#94A3B8"
+    },
+    "accent": {
+      "primary": "#3B82F6",
+      "success": "#22C55E",
+      "warning": "#F59E0B",
+      "error": "#EF4444"
+    },
+    "data": {
+      "task-normal": "#CBD5E1",
+      "task-critical": "#3B82F6",
+      "task-overdue": "#EF4444",
+      "task-completed": "#22C55E",
+      "dependency": "#94A3B8",
+      "weekend": "#F1F5F9",
+      "cost-saving": "#22C55E",
+      "cost-increase": "#EF4444"
+    }
+  },
+  "typography": {
+    "fontFamily": "Inter, system-ui, sans-serif",
+    "scale": {
+      "display": 48,
+      "h1": 30,
+      "h2": 24,
+      "h3": 20,
+      "h4": 18,
+      "body": 14,
+      "small": 12,
+      "caption": 11
+    }
+  },
+  "spacing": {
+    "base": 8,
+    "scale": [4, 8, 16, 24, 32, 48, 64, 96]
+  }
+}
