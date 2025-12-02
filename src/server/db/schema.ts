@@ -44,6 +44,8 @@ export const user = createTable("user", {
     .$defaultFn(() => false)
     .notNull(),
   image: text("image"),
+  organizationId: integer("organization_id")
+    .references(() => organizations.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
@@ -96,10 +98,14 @@ export const verification = createTable("verification", {
   ),
 });
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ many, one }) => ({
   account: many(account),
   session: many(session),
   organizationMemberships: many(organizationMembers),
+  organization: one(organizations, {
+    fields: [user.organizationId],
+    references: [organizations.id],
+  }),
   resources: many(resources),
   timeEntries: many(timeEntries),
 }));
@@ -120,6 +126,7 @@ export const organizations = createTable(
     name: d.varchar({ length: 256 }).notNull(),
     description: d.text(),
     slug: d.varchar({ length: 100 }).notNull().unique(),
+    timezone: d.varchar({ length: 50 }).notNull().default("UTC"), // IANA timezone identifier
     createdAt: d
       .timestamp({ withTimezone: true })
       .$defaultFn(() => new Date())
@@ -129,6 +136,7 @@ export const organizations = createTable(
   (t) => [
     index("organization_name_idx").on(t.name),
     index("organization_slug_idx").on(t.slug),
+    index("organization_timezone_idx").on(t.timezone),
   ],
 );
 
@@ -554,6 +562,7 @@ export const organizationRelations = relations(organizations, ({ many }) => ({
   members: many(organizationMembers),
   projects: many(projects),
   resources: many(resources),
+  users: many(user),
 }));
 
 export const organizationMemberRelations = relations(organizationMembers, ({ one }) => ({

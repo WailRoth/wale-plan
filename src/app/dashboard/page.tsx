@@ -49,9 +49,9 @@ export default async function DashboardPage() {
                 <p className="text-xs text-muted-foreground">
                   Create or join organizations
                 </p>
-                <Link href="/dashboard/organizations/new">
+                <Link href="/dashboard/organizations">
                   <Button variant="outline" size="sm" className="mt-2 w-full">
-                    Create Organization
+                    Manage Organizations
                   </Button>
                 </Link>
               </CardContent>

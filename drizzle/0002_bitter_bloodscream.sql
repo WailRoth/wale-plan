@@ -1,0 +1,2 @@
+ALTER TABLE "pg-drizzle_user" ADD COLUMN "organization_id" integer;--> statement-breakpoint
+ALTER TABLE "pg-drizzle_user" ADD CONSTRAINT "pg-drizzle_user_organization_id_pg-drizzle_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."pg-drizzle_organization"("id") ON DELETE set null ON UPDATE no action;

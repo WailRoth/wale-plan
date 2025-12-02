@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-import { User, LogOut, Settings, BarChart3 } from "lucide-react";
+import { User, LogOut, Settings, BarChart3, Building } from "lucide-react";
 
 export function Navigation() {
   const { session, signOut, isLoading } = useAuth();
@@ -55,6 +55,13 @@ export function Navigation() {
               </Button>
             </Link>
 
+            <Link href="/dashboard/organizations">
+              <Button variant="ghost" className="flex items-center space-x-2">
+                <Building className="h-4 w-4" />
+                <span>Organizations</span>
+              </Button>
+            </Link>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -82,6 +89,12 @@ export function Navigation() {
                   <Link href="/dashboard" className="flex items-center space-x-2 w-full">
                     <BarChart3 className="h-4 w-4" />
                     <span>Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/organizations" className="flex items-center space-x-2 w-full">
+                    <Building className="h-4 w-4" />
+                    <span>Organizations</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

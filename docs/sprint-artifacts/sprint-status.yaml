@@ -37,10 +37,10 @@ story_location: /home/adumain/dev/wale-plan/docs/sprint-artifacts
 
 development_status:
   # Epic 1: Foundation Setup & User Workspace
-  epic-1: backlog
+  epic-1: in-progress
   1-1-user-authentication-system: review
-  1-2-organization-management-setup: backlog
-  1-3-project-creation-and-management: backlog
+  1-2-organization-management-setup: review
+  1-3-project-creation-and-management: ready-for-dev
   epic-1-retrospective: optional
 
   # Epic 2: Advanced Resource Management System
