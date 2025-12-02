@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,17 +12,16 @@ import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 import { toast } from "~/components/ui/toast/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Checkbox } from "~/components/ui/checkbox";
-import { Loader2, Plus, Calendar, Clock } from "lucide-react";
-import { useOrganization } from "~/lib/organization/context";
+import { Loader2, Plus, Calendar, Clock, AlertTriangle } from "lucide-react";
 
 // Form validation schema
 const projectFormSchema = z.object({
   organizationId: z.number().min(1, "Organization is required"),
   name: z.string().min(1, "Project name is required").max(256),
   description: z.string().optional(),
-  status: z.enum(["planning", "active", "completed", "archived"]).default("planning"),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  status: z.enum(["planning", "active", "completed", "archived"]),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
   workingDays: z.array(z.enum(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]))
     .min(1, "At least one working day is required")
     .max(7, "Cannot have more than 7 working days"),
@@ -39,7 +38,7 @@ interface ProjectCreationFormProps {
   defaultOrganizationId?: number;
 }
 
-const workingDaysOptions = [
+const workingDaysOptions: Array<{ id: "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun"; label: string }> = [
   { id: "Mon", label: "Monday" },
   { id: "Tue", label: "Tuesday" },
   { id: "Wed", label: "Wednesday" },
@@ -70,8 +69,24 @@ export function ProjectCreationForm({
   onSuccess,
   defaultOrganizationId,
 }: ProjectCreationFormProps) {
-  const { data: organizations } = api.organization.getUserOrganizations.useQuery();
+  const [organizationError, setOrganizationError] = useState<string | null>(null);
+
+  // Safe organization data fetching with error handling
+  const { data: organizations, error: orgError } = api.organization.getUserOrganizations.useQuery(undefined, {
+    retry: 2,
+  });
+
   const { refetch: refetchProjects } = api.projects.getUserProjects.useQuery();
+
+  // Clear error when organizations load successfully and handle errors
+  useEffect(() => {
+    if (organizations?.success) {
+      setOrganizationError(null);
+    } else if (orgError) {
+      console.error('Failed to fetch organizations:', orgError);
+      setOrganizationError('Unable to load organizations. Please refresh the page.');
+    }
+  }, [organizations, orgError]);
 
   const createMutation = api.projects.create.useMutation({
     onSuccess: (result) => {
@@ -105,11 +120,11 @@ export function ProjectCreationForm({
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
-      organizationId: defaultOrganizationId || (organizations?.success ? organizations.data[0]?.organizationId : 0),
+      organizationId: defaultOrganizationId || (organizations?.success ? organizations.data[0]?.id : 0),
       name: "",
       description: "",
       status: "planning",
-      workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+      workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"] as ("Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun")[],
       workingHours: defaultWorkingHours,
     },
   });
@@ -117,7 +132,7 @@ export function ProjectCreationForm({
   const workingDays = form.watch("workingDays");
   const workingHours = form.watch("workingHours");
 
-  const handleWorkingDayChange = (dayId: string, checked: boolean) => {
+  const handleWorkingDayChange = (dayId: "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun", checked: boolean) => {
     const currentDays = form.getValues("workingDays");
     if (checked) {
       form.setValue("workingDays", [...currentDays, dayId]);
@@ -126,7 +141,7 @@ export function ProjectCreationForm({
     }
   };
 
-  const handleWorkingHoursChange = (dayId: string, field: "start" | "end", value: string) => {
+  const handleWorkingHoursChange = (dayId: "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun", field: "start" | "end", value: string) => {
     const currentHours = form.getValues("workingHours");
     form.setValue("workingHours", {
       ...currentHours,
@@ -134,7 +149,7 @@ export function ProjectCreationForm({
         ...currentHours[dayId.toLowerCase()],
         [field]: value,
       },
-    });
+    } as Record<string, { start: string; end: string }>);
   };
 
   const onSubmit = async (data: ProjectFormValues) => {
@@ -153,6 +168,34 @@ export function ProjectCreationForm({
   };
 
   const selectedOrgId = form.watch("organizationId");
+
+  // Error boundary fallback
+  if (organizationError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="h-5 w-5" />
+            Unable to Load Organizations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-red-600">
+              {organizationError}
+            </p>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              className="w-full"
+            >
+              Refresh Page
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -314,7 +357,7 @@ export function ProjectCreationForm({
             </div>
             {form.formState.errors.workingHours && (
               <p className="text-sm text-destructive">
-                {form.formState.errors.workingHours.message}
+                {form.formState.errors.workingHours.message as string}
               </p>
             )}
           </div>

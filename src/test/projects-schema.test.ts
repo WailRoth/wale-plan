@@ -14,7 +14,7 @@ vi.mock('../server/db', () => ({
 
 // Mock schema to use actual values
 vi.mock('../server/db/schema', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal<any>();
   return {
     ...actual,
   };

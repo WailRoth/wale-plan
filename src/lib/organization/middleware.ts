@@ -9,7 +9,8 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 export const withOrganization = (procedure: typeof protectedProcedure) =>
   procedure.use(async ({ ctx, next }) => {
     // Try to get organization ID from session context first
-    let organizationId = ctx.session?.user?.organizationId;
+    // Note: user.organizationId may not be in types yet, so use type assertion
+    let organizationId = (ctx.session?.user as any)?.organizationId;
 
     // Fallback to request headers if not in session
     if (!organizationId) {

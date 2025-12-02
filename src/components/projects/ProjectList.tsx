@@ -38,6 +38,7 @@ interface ProjectListProps {
   organizationId?: number;
   onProjectSelect?: (projectId: number) => void;
   onProjectEdit?: (projectId: number) => void;
+  onProjectCreate?: () => void;
   refreshTrigger?: number;
 }
 
@@ -165,14 +166,18 @@ export function ProjectList({
                   )}
 
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>Start: {formatDate(project.startDate)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      <span>End: {formatDate(project.endDate)}</span>
-                    </div>
+                    {"startDate" in project && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>Start: {formatDate(project.startDate)}</span>
+                      </div>
+                    )}
+                    {"endDate" in project && (
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>End: {formatDate(project.endDate)}</span>
+                      </div>
+                    )}
                     {"organizationName" in project && (
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4" />

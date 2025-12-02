@@ -26,13 +26,13 @@ const calendarSettingsSchema = z.object({
 type CalendarSettingsValues = z.infer<typeof calendarSettingsSchema>;
 
 interface CalendarSettingsProps {
-  initialWorkingDays?: string[];
+  initialWorkingDays?: ("Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun")[];
   initialWorkingHours?: Record<string, { start: string; end: string }>;
   onSave?: (settings: CalendarSettingsValues) => void;
   disabled?: boolean;
 }
 
-const workingDaysOptions = [
+const workingDaysOptions: Array<{ id: "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun"; label: string }> = [
   { id: "Mon", label: "Monday" },
   { id: "Tue", label: "Tuesday" },
   { id: "Wed", label: "Wednesday" },
@@ -55,28 +55,28 @@ const defaultWorkingHours = {
 const quickSettings = {
   "5-day": {
     label: "5-Day Week",
-    workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri"] as ("Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun")[],
     workingHours: defaultWorkingHours,
   },
   "6-day": {
     label: "6-Day Week",
-    workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as ("Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun")[],
     workingHours: defaultWorkingHours,
   },
   "7-day": {
     label: "7-Day Week",
-    workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    workingDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as ("Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun")[],
     workingHours: defaultWorkingHours,
   },
   "weekend-only": {
     label: "Weekend Only",
-    workingDays: ["Sat", "Sun"],
+    workingDays: ["Sat", "Sun"] as ("Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun")[],
     workingHours: defaultWorkingHours,
   },
 } as const;
 
 export function CalendarSettings({
-  initialWorkingDays = ["Mon", "Tue", "Wed", "Thu", "Fri"],
+  initialWorkingDays = ["Mon", "Tue", "Wed", "Thu", "Fri"] as ("Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun")[],
   initialWorkingHours = defaultWorkingHours,
   onSave,
   disabled = false,
@@ -154,8 +154,8 @@ export function CalendarSettings({
     const [startHour, startMin] = start.split(":").map(Number);
     const [endHour, endMin] = end.split(":").map(Number);
 
-    if (startHour > endHour) return false;
-    if (startHour === endHour && startMin >= endMin) return false;
+    if ((startHour ?? 0) > (endHour ?? 0)) return false;
+    if ((startHour ?? 0) === (endHour ?? 0) && (startMin ?? 0) >= (endMin ?? 0)) return false;
 
     return true;
   };
@@ -266,7 +266,7 @@ export function CalendarSettings({
             </div>
             {form.formState.errors.workingHours && (
               <p className="text-sm text-destructive">
-                {form.formState.errors.workingHours.message}
+                {form.formState.errors.workingHours.message as string}
               </p>
             )}
           </div>

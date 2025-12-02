@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 import {
   createTRPCRouter,
@@ -34,11 +35,11 @@ export const projectsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
       organizationId: z.number().min(1, "Organization ID is required"),
-      name: z.string().min(1, "Project name is required").max(256),
-      description: z.string().optional(),
+      name: z.string().min(1, "Project name is required").max(256).trim().transform(val => val.replace(/<[^>]*>/g, '')), // Sanitize HTML
+      description: z.string().optional().transform(val => val ? val.trim().replace(/<[^>]*>/g, '') : ''), // Sanitize HTML
       status: projectStatusSchema.optional(),
-      startDate: z.string().datetime().optional(),
-      endDate: z.string().datetime().optional(),
+      startDate: z.date().optional(),
+      endDate: z.date().optional(),
       workingDays: workingDaysSchema.optional(),
       workingHours: workingHoursSchema.optional(),
     }))
@@ -68,8 +69,8 @@ export const projectsRouter = createTRPCRouter({
           name: input.name,
           description: input.description,
           status: input.status || "planning",
-          startDate: input.startDate ? new Date(input.startDate) : undefined,
-          endDate: input.endDate ? new Date(input.endDate) : undefined,
+          startDate: input.startDate,
+          endDate: input.endDate,
           workingDays: input.workingDays || ["Mon", "Tue", "Wed", "Thu", "Fri"],
           workingHours: input.workingHours || {
             monday: { start: "09:00", end: "17:00" },
@@ -112,11 +113,11 @@ export const projectsRouter = createTRPCRouter({
     .input(z.object({
       id: z.number(),
       organizationId: z.number().optional(),
-      name: z.string().min(1).max(256).optional(),
-      description: z.string().optional(),
+      name: z.string().min(1).max(256).trim().transform(val => val.replace(/<[^>]*>/g, '')).optional(), // Sanitize HTML
+      description: z.string().transform(val => val ? val.trim().replace(/<[^>]*>/g, '') : '').optional(), // Sanitize HTML
       status: projectStatusSchema.optional(),
-      startDate: z.string().datetime().optional(),
-      endDate: z.string().datetime().optional(),
+      startDate: z.date().optional(),
+      endDate: z.date().optional(),
       workingDays: workingDaysSchema.optional(),
       workingHours: workingHoursSchema.optional(),
     }))
@@ -143,13 +144,22 @@ export const projectsRouter = createTRPCRouter({
           };
         }
 
-        // Update project
-        const updateData: any = {};
+        // Update project with proper typing following Drizzle patterns
+        const updateData: {
+          name?: string;
+          description?: string | null;
+          status?: string;
+          startDate?: Date | null;
+          endDate?: Date | null;
+          workingDays?: string[];
+          workingHours?: Record<string, { start: string; end: string }>;
+        } = {};
+
         if (input.name !== undefined) updateData.name = input.name;
         if (input.description !== undefined) updateData.description = input.description;
         if (input.status !== undefined) updateData.status = input.status;
-        if (input.startDate !== undefined) updateData.startDate = new Date(input.startDate);
-        if (input.endDate !== undefined) updateData.endDate = new Date(input.endDate);
+        if (input.startDate !== undefined) updateData.startDate = input.startDate;
+        if (input.endDate !== undefined) updateData.endDate = input.endDate;
         if (input.workingDays !== undefined) updateData.workingDays = input.workingDays;
         if (input.workingHours !== undefined) updateData.workingHours = input.workingHours;
 
@@ -288,7 +298,14 @@ export const projectsRouter = createTRPCRouter({
             status: project.status,
             startDate: project.startDate,
             endDate: project.endDate,
-          })),
+          })) as Array<{
+            id: number;
+            name: string;
+            description: string | null;
+            status: string;
+            startDate: Date | null;
+            endDate: Date | null;
+          }>,
         };
       } catch (error) {
         return {

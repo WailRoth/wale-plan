@@ -18,13 +18,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Badge } from "~/components/ui/badge";
-import { toast } from "~/components/ui/toast/use-toast";
 import {
   Folder,
   ChevronDown,
   Plus,
-  Settings,
-  Users,
 } from "lucide-react";
 
 interface ProjectNavigationProps {
@@ -45,8 +42,14 @@ export function ProjectNavigation({
   const [mounted, setMounted] = useState(false);
 
   const { data: projects, isLoading } = organizationId
-    ? api.projects.getOrganizationProjects.useQuery({ organizationId })
-    : api.projects.getUserProjects.useQuery();
+    ? api.projects.getOrganizationProjects.useQuery({ organizationId }, {
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes (cacheTime renamed to gcTime in newer versions)
+      })
+    : api.projects.getUserProjects.useQuery(undefined, {
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes (cacheTime renamed to gcTime in newer versions)
+      });
 
   // Fix hydration issues with localStorage/state
   useEffect(() => {
@@ -182,8 +185,14 @@ export function CompactProjectNavigation({
   const [mounted, setMounted] = useState(false);
 
   const { data: projects, isLoading } = organizationId
-    ? api.projects.getOrganizationProjects.useQuery({ organizationId })
-    : api.projects.getUserProjects.useQuery();
+    ? api.projects.getOrganizationProjects.useQuery({ organizationId }, {
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes (cacheTime renamed to gcTime in newer versions)
+      })
+    : api.projects.getUserProjects.useQuery(undefined, {
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes (cacheTime renamed to gcTime in newer versions)
+      });
 
   useEffect(() => {
     setMounted(true);

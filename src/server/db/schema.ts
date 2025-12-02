@@ -178,8 +178,8 @@ export const projects = createTable(
     name: d.varchar({ length: 256 }).notNull(),
     description: d.text(),
     status: d.varchar({ length: 50 }).notNull().default("planning"), // planning, active, completed, archived
-    startDate: d.date(),
-    endDate: d.date(),
+    startDate: d.timestamp({ withTimezone: false }),
+    endDate: d.timestamp({ withTimezone: false }),
     // Calendar settings for project
     workingDays: d.text("working_days").array().notNull().default(sql`'{"Mon","Tue","Wed","Thu","Fri"}'::text[]`), // Default working days
     workingHours: d.json("working_hours").$type<Record<string, { start: string; end: string }>>().$default(() => ({
