@@ -1,2 +1,0 @@
-ALTER TABLE "pg-drizzle_organization" ADD COLUMN "timezone" varchar(50) DEFAULT 'UTC' NOT NULL;--> statement-breakpoint
-CREATE INDEX "organization_timezone_idx" ON "pg-drizzle_organization" USING btree ("timezone");

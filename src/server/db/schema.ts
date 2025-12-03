@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   index,
+  unique,
   pgTableCreator,
   text,
   timestamp,
@@ -12,6 +13,7 @@ import {
   primaryKey,
   numeric,
   json,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 export const createTable = pgTableCreator((name) => `pg-drizzle_${name}`);
@@ -525,6 +527,43 @@ export const resourceDayTypeRates = createTable(
   ],
 );
 
+// Resource Availability Exceptions - One-time exceptions to weekly patterns
+export const resourceAvailabilityExceptions = createTable(
+  "resource_availability_exceptions",
+  (d) => ({
+    id: d.uuid().primaryKey().defaultRandom(),
+    organizationId: d
+      .integer("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    resourceId: d
+      .integer("resource_id")
+      .notNull()
+      .references(() => resources.id, { onDelete: "cascade" }),
+    exceptionDate: d.date("exception_date").notNull(),
+    startTimeUtc: d.time("start_time_utc"), // nullable if hoursUsed
+    endTimeUtc: d.time("end_time_utc"), // nullable
+    hoursAvailable: d.numeric("hours_available", { precision: 4, scale: 2 }).notNull(),
+    hourlyRate: d.numeric("hourly_rate", { precision: 10, scale: 2 }).notNull(),
+    currency: d.varchar({ length: 3 }).notNull().default("USD"),
+    isActive: d.boolean("is_active").default(true).notNull(),
+    exceptionType: d.varchar({ length: 20 }).notNull(), // 'holiday','vacation','custom','non-working'
+    notes: d.text(),
+    createdAt: d
+      .timestamp({ withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+  }),
+  (t) => [
+    // Unique constraint ensures one exception per resource per date
+    unique("resource_exception_unique").on(t.resourceId, t.exceptionDate),
+    index("resource_exception_org_idx").on(t.organizationId),
+    index("resource_exception_date_idx").on(t.exceptionDate),
+    index("resource_exception_active_idx").on(t.isActive),
+  ],
+);
+
 // Time Entries for actual time tracking
 export const timeEntries = createTable(
   "time_entry",
@@ -611,6 +650,7 @@ export const resourceRelations = relations(resources, ({ one, many }) => ({
   availabilityPeriods: many(resourceAvailability),
   timeZones: many(resourceTimeZones),
   dayTypeRates: many(resourceDayTypeRates),
+  availabilityExceptions: many(resourceAvailabilityExceptions),
 }));
 
 export const taskRelations = relations(tasks, ({ one, many }) => ({
@@ -722,6 +762,17 @@ export const resourceDayTypeRateRelations = relations(resourceDayTypeRates, ({ o
   resource: one(resources, {
     fields: [resourceDayTypeRates.resourceId],
     references: [resources.id],
+  }),
+}));
+
+export const resourceAvailabilityExceptionRelations = relations(resourceAvailabilityExceptions, ({ one }) => ({
+  resource: one(resources, {
+    fields: [resourceAvailabilityExceptions.resourceId],
+    references: [resources.id],
+  }),
+  organization: one(organizations, {
+    fields: [resourceAvailabilityExceptions.organizationId],
+    references: [organizations.id],
   }),
 }));
 

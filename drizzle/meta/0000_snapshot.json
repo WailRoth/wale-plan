@@ -1,5 +1,5 @@
 {
-  "id": "e0cc7c00-64e3-4c6e-a31c-88b24ffe208c",
+  "id": "13f19c22-dd3c-4344-822a-ba6fa21d4e58",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -519,6 +519,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "timezone": {
+          "name": "timezone",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'UTC'"
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp with time zone",
@@ -553,6 +560,21 @@
           "columns": [
             {
               "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "organization_timezone_idx": {
+          "name": "organization_timezone_idx",
+          "columns": [
+            {
+              "expression": "timezone",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -726,13 +748,26 @@
         },
         "startDate": {
           "name": "startDate",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
         "endDate": {
           "name": "endDate",
-          "type": "date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "working_days": {
+          "name": "working_days",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{\"Mon\",\"Tue\",\"Wed\",\"Thu\",\"Fri\"}'::text[]"
+        },
+        "working_hours": {
+          "name": "working_hours",
+          "type": "json",
           "primaryKey": false,
           "notNull": false
         },
@@ -785,6 +820,21 @@
           "columns": [
             {
               "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "project_working_days_idx": {
+          "name": "project_working_days_idx",
+          "columns": [
+            {
+              "expression": "working_days",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1168,6 +1218,200 @@
         "pg-drizzle_resource_availability_resource_id_pg-drizzle_resource_id_fk": {
           "name": "pg-drizzle_resource_availability_resource_id_pg-drizzle_resource_id_fk",
           "tableFrom": "pg-drizzle_resource_availability",
+          "tableTo": "pg-drizzle_resource",
+          "columnsFrom": [
+            "resource_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pg-drizzle_resource_availability_exception": {
+      "name": "pg-drizzle_resource_availability_exception",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resource_id": {
+          "name": "resource_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "exception_date": {
+          "name": "exception_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_time_utc": {
+          "name": "start_time_utc",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_time_utc": {
+          "name": "end_time_utc",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hours_available": {
+          "name": "hours_available",
+          "type": "numeric(4, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hourly_rate": {
+          "name": "hourly_rate",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'USD'"
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "exceptionType": {
+          "name": "exceptionType",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "resource_exception_unique_idx": {
+          "name": "resource_exception_unique_idx",
+          "columns": [
+            {
+              "expression": "resource_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "exception_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resource_exception_org_idx": {
+          "name": "resource_exception_org_idx",
+          "columns": [
+            {
+              "expression": "organization_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resource_exception_date_idx": {
+          "name": "resource_exception_date_idx",
+          "columns": [
+            {
+              "expression": "exception_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "resource_exception_active_idx": {
+          "name": "resource_exception_active_idx",
+          "columns": [
+            {
+              "expression": "is_active",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pg-drizzle_resource_availability_exception_organization_id_pg-drizzle_organization_id_fk": {
+          "name": "pg-drizzle_resource_availability_exception_organization_id_pg-drizzle_organization_id_fk",
+          "tableFrom": "pg-drizzle_resource_availability_exception",
+          "tableTo": "pg-drizzle_organization",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pg-drizzle_resource_availability_exception_resource_id_pg-drizzle_resource_id_fk": {
+          "name": "pg-drizzle_resource_availability_exception_resource_id_pg-drizzle_resource_id_fk",
+          "tableFrom": "pg-drizzle_resource_availability_exception",
           "tableTo": "pg-drizzle_resource",
           "columnsFrom": [
             "resource_id"
@@ -2575,6 +2819,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -2589,7 +2839,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "pg-drizzle_user_organization_id_pg-drizzle_organization_id_fk": {
+          "name": "pg-drizzle_user_organization_id_pg-drizzle_organization_id_fk",
+          "tableFrom": "pg-drizzle_user",
+          "tableTo": "pg-drizzle_organization",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "pg-drizzle_user_email_unique": {

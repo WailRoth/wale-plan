@@ -158,24 +158,22 @@ export const resourcePatternsRouter = createTRPCRouter({
         // If no schedules exist, return default patterns
         if (schedules.length === 0) {
           const defaultPatterns = getDefaultAvailabilityPatterns();
-          const defaultSchedules = defaultPatterns.map((pattern, index) => ({
+          const defaultSchedules: ResourceWorkScheduleResponse[] = defaultPatterns.map((pattern, index) => ({
             resourceId: input.resourceId,
             dayOfWeek: DAY_OF_WEEK_TO_NUMBER[pattern.dayOfWeek]!,
+            dayOfWeekName: pattern.dayOfWeek,
             isActive: pattern.isActive,
-            workStartTime: pattern.startTime.substring(0, 5), // Format HH:MM
-            workEndTime: pattern.endTime.substring(0, 5), // Format HH:MM
-            totalWorkHours: pattern.isActive ? validateWorkingHours(pattern.startTime, pattern.endTime).toString() : "0",
+            workStartTime: pattern.isActive ? pattern.startTime.substring(0, 5) : null, // Format HH:MM
+            workEndTime: pattern.isActive ? pattern.endTime.substring(0, 5) : null, // Format HH:MM
+            totalWorkHours: pattern.isActive ? validateWorkingHours(pattern.startTime, pattern.endTime) : null,
             hourlyRate: null,
             currency: "USD",
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           }));
 
-          // Convert to proper ResourceWorkScheduleResponse format
-          const responseSchedules = defaultSchedules.map((schedule) => ({
-            ...schedule,
-            dayOfWeekName: NUMBER_TO_DAY_NAME[schedule.dayOfWeek]!,
-          }));
+          // The schedules are already in the correct format
+          const responseSchedules = defaultSchedules;
 
           return {
             success: true,
@@ -280,6 +278,8 @@ export const resourcePatternsRouter = createTRPCRouter({
           // Insert new schedules
           for (const pattern of input.patterns) {
             const dayOfWeek = DAY_OF_WEEK_TO_NUMBER[pattern.dayOfWeek];
+            if (!dayOfWeek) continue; // Skip invalid dayOfWeek
+
             const workHours = pattern.isActive ? validateWorkingHours(pattern.startTime, pattern.endTime) : 0;
 
             await tx.insert(resourceWorkSchedules).values({
@@ -370,6 +370,8 @@ export const resourcePatternsRouter = createTRPCRouter({
           // Insert default schedules
           for (const pattern of defaultPatterns) {
             const dayOfWeek = DAY_OF_WEEK_TO_NUMBER[pattern.dayOfWeek];
+            if (!dayOfWeek) continue; // Skip invalid dayOfWeek
+
             const workHours = pattern.isActive ? validateWorkingHours(pattern.startTime, pattern.endTime) : 0;
 
             await tx.insert(resourceWorkSchedules).values({

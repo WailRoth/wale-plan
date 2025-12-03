@@ -38,13 +38,16 @@ export function DayRowEditor({
   onChange
 }: DayRowEditorProps) {
   const [startTime, setStartTime] = React.useState(
-    "startTime" in pattern ? pattern.startTime : "09:00"
+    "startTime" in pattern ? pattern.startTime :
+    "workStartTime" in pattern ? pattern.workStartTime || "09:00" : "09:00"
   );
   const [endTime, setEndTime] = React.useState(
-    "endTime" in pattern ? pattern.endTime : "17:00"
+    "endTime" in pattern ? pattern.endTime :
+    "workEndTime" in pattern ? pattern.workEndTime || "17:00" : "17:00"
   );
   const [hourlyRate, setHourlyRate] = React.useState(
-    "hourlyRate" in pattern ? pattern.hourlyRate?.toString() || "" : ""
+    ("hourlyRate" in pattern && typeof pattern.hourlyRate === "number") ? pattern.hourlyRate.toString() :
+    ("hourlyRate" in pattern && typeof pattern.hourlyRate === "string") ? pattern.hourlyRate : ""
   );
   const [isActive, setIsActive] = React.useState(
     pattern.isActive || false

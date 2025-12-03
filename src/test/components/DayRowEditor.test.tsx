@@ -53,8 +53,8 @@ describe("DayRowEditor", () => {
   it("shows active status when pattern is active", () => {
     render(<DayRowEditor {...defaultProps} />);
 
-    expect(screen.getByText("Actif")).toBeInTheDocument();
     const checkbox = screen.getByRole("checkbox", { name: /Actif/i });
+    expect(checkbox).toBeInTheDocument();
     expect(checkbox).toBeChecked();
   });
 
@@ -243,7 +243,7 @@ describe("DayRowEditor", () => {
         workStartTime: "10:00",
         workEndTime: "18:00",
         totalWorkHours: 8.0,
-        hourlyRate: 55.00,  // Changed to number to match updated ResourceWorkScheduleResponse type
+        hourlyRate: 55.00,
         currency: "USD",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

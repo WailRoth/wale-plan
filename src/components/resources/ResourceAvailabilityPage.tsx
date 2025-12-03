@@ -5,10 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { DailyAvailabilityTable } from "./DailyAvailabilityTable";
+import { ExceptionsTab } from "./ExceptionsTab";
 import { api } from "~/trpc/react";
 import { toast } from "~/components/ui/toast/use-toast";
-import { Loader2, Settings, ArrowLeft } from "lucide-react";
+import { Loader2, Settings, ArrowLeft, Calendar } from "lucide-react";
 import { type DailyAvailabilityPattern } from "~/lib/validations/resourcePattern";
 
 interface ResourceAvailabilityPageProps {
@@ -249,50 +251,85 @@ export function ResourceAvailabilityPage({ className }: ResourceAvailabilityPage
       </div>
 
       {/* Main Content */}
-      <div className="grid gap-6">
-        {/* Availability Table */}
-        <DailyAvailabilityTable
-          patterns={currentPatterns.length > 0 ? currentPatterns : patterns}
-          currency={currency}
-          disabled={updatePatternMutation.isPending}
-          onChange={handlePatternChange}
-        />
+      <div className="space-y-6">
+        {/* Tabbed Interface */}
+        <Tabs defaultValue="weekly" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="weekly" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Weekly Availability
+            </TabsTrigger>
+            <TabsTrigger value="exceptions" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Exceptions
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Action Buttons */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-center">
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleResetToDefaults}
-                  disabled={resetToDefaultsMutation.isPending || updatePatternMutation.isPending}
-                >
-                  {resetToDefaultsMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Réinitialiser
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={!hasChanges || updatePatternMutation.isPending}
-                >
-                  Annuler
-                </Button>
-              </div>
-              <Button
-                onClick={handleSave}
-                disabled={!hasChanges || updatePatternMutation.isPending}
-              >
-                {updatePatternMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                Enregistrer
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Weekly Availability Tab */}
+          <TabsContent value="weekly" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="mr-2 h-5 w-5" />
+                  Weekly Availability Patterns
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Configure the standard weekly availability patterns for this resource.
+                  These patterns will be used unless an exception overrides them for a specific date.
+                </p>
+
+                <DailyAvailabilityTable
+                  patterns={currentPatterns.length > 0 ? currentPatterns : patterns}
+                  currency={currency}
+                  disabled={updatePatternMutation.isPending}
+                  onChange={handlePatternChange}
+                />
+
+                {/* Action Buttons */}
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleResetToDefaults}
+                      disabled={resetToDefaultsMutation.isPending || updatePatternMutation.isPending}
+                    >
+                      {resetToDefaultsMutation.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : null}
+                      Réinitialiser
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleCancel}
+                      disabled={!hasChanges || updatePatternMutation.isPending}
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                  <Button
+                    onClick={handleSave}
+                    disabled={!hasChanges || updatePatternMutation.isPending}
+                  >
+                    {updatePatternMutation.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    Enregistrer
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Exceptions Tab */}
+          <TabsContent value="exceptions">
+            <ExceptionsTab
+              resourceId={resourceId}
+              currency={currency}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

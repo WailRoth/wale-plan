@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1764604444637,
-      "tag": "0000_absent_mephistopheles",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1764681254443,
-      "tag": "0001_eminent_steel_serpent",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1764685478971,
-      "tag": "0002_bitter_bloodscream",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1764686581382,
-      "tag": "0003_dizzy_network",
+      "when": 1764758043160,
+      "tag": "0000_lame_blindfold",
       "breakpoints": true
     }
   ]

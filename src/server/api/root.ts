@@ -4,6 +4,7 @@ import { authRouter } from "~/server/api/routers/auth";
 import { projectsRouter } from "~/server/api/routers/projects";
 import { resourcesRouter } from "~/server/api/routers/resources";
 import { resourcePatternsRouter } from "~/server/api/routers/resourcePatterns";
+import { resourceAvailabilityExceptionsRouter } from "~/server/api/routers/resourceAvailabilityExceptions";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   projects: projectsRouter,
   resources: resourcesRouter,
   resourcePatterns: resourcePatternsRouter,
+  resourceAvailabilityExceptions: resourceAvailabilityExceptionsRouter,
 });
 
 // export type definition of API

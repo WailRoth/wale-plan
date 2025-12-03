@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
 import { resourcePatternsRouter } from "~/server/api/routers/resourcePatterns";
@@ -6,6 +6,10 @@ import { createTRPCContext } from "~/server/api/trpc";
 import { resourceWorkSchedules, resources, organizations, organizationMembers } from "~/server/db/schema";
 import { eq, and } from "drizzle-orm";
 import type { DailyAvailabilityPattern } from "~/lib/validations/resourcePattern";
+
+// Override the global mock for this integration test
+vi.unmock("~/server/db");
+vi.unmock("~/server/db/schema");
 
 // Mock data setup - using type any to avoid complex auth session typing
 interface MockContext {
