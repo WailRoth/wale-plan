@@ -108,7 +108,7 @@ CREATE TABLE "pg-drizzle_resource_availability" (
 	"updatedAt" timestamp with time zone
 );
 --> statement-breakpoint
-CREATE TABLE "pg-drizzle_resource_availability_exception" (
+CREATE TABLE "pg-drizzle_resource_availability_exceptions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" integer NOT NULL,
 	"resource_id" integer NOT NULL,
@@ -122,7 +122,8 @@ CREATE TABLE "pg-drizzle_resource_availability_exception" (
 	"exceptionType" varchar(20) NOT NULL,
 	"notes" text,
 	"createdAt" timestamp with time zone NOT NULL,
-	"updatedAt" timestamp with time zone
+	"updatedAt" timestamp with time zone,
+	CONSTRAINT "resource_exception_unique" UNIQUE("resource_id","exception_date")
 );
 --> statement-breakpoint
 CREATE TABLE "pg-drizzle_resource_day_type_rate" (
@@ -283,8 +284,8 @@ ALTER TABLE "pg-drizzle_project" ADD CONSTRAINT "pg-drizzle_project_organization
 ALTER TABLE "pg-drizzle_resource_assignment" ADD CONSTRAINT "pg-drizzle_resource_assignment_task_id_pg-drizzle_task_id_fk" FOREIGN KEY ("task_id") REFERENCES "public"."pg-drizzle_task"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pg-drizzle_resource_assignment" ADD CONSTRAINT "pg-drizzle_resource_assignment_resource_id_pg-drizzle_resource_id_fk" FOREIGN KEY ("resource_id") REFERENCES "public"."pg-drizzle_resource"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pg-drizzle_resource_availability" ADD CONSTRAINT "pg-drizzle_resource_availability_resource_id_pg-drizzle_resource_id_fk" FOREIGN KEY ("resource_id") REFERENCES "public"."pg-drizzle_resource"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "pg-drizzle_resource_availability_exception" ADD CONSTRAINT "pg-drizzle_resource_availability_exception_organization_id_pg-drizzle_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."pg-drizzle_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "pg-drizzle_resource_availability_exception" ADD CONSTRAINT "pg-drizzle_resource_availability_exception_resource_id_pg-drizzle_resource_id_fk" FOREIGN KEY ("resource_id") REFERENCES "public"."pg-drizzle_resource"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "pg-drizzle_resource_availability_exceptions" ADD CONSTRAINT "pg-drizzle_resource_availability_exceptions_organization_id_pg-drizzle_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."pg-drizzle_organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "pg-drizzle_resource_availability_exceptions" ADD CONSTRAINT "pg-drizzle_resource_availability_exceptions_resource_id_pg-drizzle_resource_id_fk" FOREIGN KEY ("resource_id") REFERENCES "public"."pg-drizzle_resource"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pg-drizzle_resource_day_type_rate" ADD CONSTRAINT "pg-drizzle_resource_day_type_rate_resource_id_pg-drizzle_resource_id_fk" FOREIGN KEY ("resource_id") REFERENCES "public"."pg-drizzle_resource"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pg-drizzle_resource_time_zone" ADD CONSTRAINT "pg-drizzle_resource_time_zone_resource_id_pg-drizzle_resource_id_fk" FOREIGN KEY ("resource_id") REFERENCES "public"."pg-drizzle_resource"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "pg-drizzle_resource_work_schedule" ADD CONSTRAINT "pg-drizzle_resource_work_schedule_resource_id_pg-drizzle_resource_id_fk" FOREIGN KEY ("resource_id") REFERENCES "public"."pg-drizzle_resource"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -321,10 +322,9 @@ CREATE INDEX "resource_availability_resource_idx" ON "pg-drizzle_resource_availa
 CREATE INDEX "resource_availability_dates_idx" ON "pg-drizzle_resource_availability" USING btree ("startDate","endDate");--> statement-breakpoint
 CREATE INDEX "resource_availability_type_idx" ON "pg-drizzle_resource_availability" USING btree ("availabilityType");--> statement-breakpoint
 CREATE INDEX "resource_availability_active_idx" ON "pg-drizzle_resource_availability" USING btree ("isActive");--> statement-breakpoint
-CREATE INDEX "resource_exception_unique_idx" ON "pg-drizzle_resource_availability_exception" USING btree ("resource_id","exception_date");--> statement-breakpoint
-CREATE INDEX "resource_exception_org_idx" ON "pg-drizzle_resource_availability_exception" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "resource_exception_date_idx" ON "pg-drizzle_resource_availability_exception" USING btree ("exception_date");--> statement-breakpoint
-CREATE INDEX "resource_exception_active_idx" ON "pg-drizzle_resource_availability_exception" USING btree ("is_active");--> statement-breakpoint
+CREATE INDEX "resource_exception_org_idx" ON "pg-drizzle_resource_availability_exceptions" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "resource_exception_date_idx" ON "pg-drizzle_resource_availability_exceptions" USING btree ("exception_date");--> statement-breakpoint
+CREATE INDEX "resource_exception_active_idx" ON "pg-drizzle_resource_availability_exceptions" USING btree ("is_active");--> statement-breakpoint
 CREATE INDEX "resource_rate_day_type_idx" ON "pg-drizzle_resource_day_type_rate" USING btree ("dayType");--> statement-breakpoint
 CREATE INDEX "resource_rate_effective_idx" ON "pg-drizzle_resource_day_type_rate" USING btree ("effectiveDate");--> statement-breakpoint
 CREATE INDEX "resource_rate_active_idx" ON "pg-drizzle_resource_day_type_rate" USING btree ("isActive");--> statement-breakpoint

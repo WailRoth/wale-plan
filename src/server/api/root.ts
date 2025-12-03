@@ -5,6 +5,7 @@ import { projectsRouter } from "~/server/api/routers/projects";
 import { resourcesRouter } from "~/server/api/routers/resources";
 import { resourcePatternsRouter } from "~/server/api/routers/resourcePatterns";
 import { resourceAvailabilityExceptionsRouter } from "~/server/api/routers/resourceAvailabilityExceptions";
+import { resourceTimelineRouter } from "~/server/api/routers/resourceTimeline";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   resources: resourcesRouter,
   resourcePatterns: resourcePatternsRouter,
   resourceAvailabilityExceptions: resourceAvailabilityExceptionsRouter,
+  resourceTimeline: resourceTimelineRouter,
 });
 
 // export type definition of API

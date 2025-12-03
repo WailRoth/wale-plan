@@ -1,5 +1,5 @@
 {
-  "id": "13f19c22-dd3c-4344-822a-ba6fa21d4e58",
+  "id": "f8699151-a427-472b-82cd-9f8bfc5e26e2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1235,8 +1235,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.pg-drizzle_resource_availability_exception": {
-      "name": "pg-drizzle_resource_availability_exception",
+    "public.pg-drizzle_resource_availability_exceptions": {
+      "name": "pg-drizzle_resource_availability_exceptions",
       "schema": "",
       "columns": {
         "id": {
@@ -1328,27 +1328,6 @@
         }
       },
       "indexes": {
-        "resource_exception_unique_idx": {
-          "name": "resource_exception_unique_idx",
-          "columns": [
-            {
-              "expression": "resource_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "exception_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "resource_exception_org_idx": {
           "name": "resource_exception_org_idx",
           "columns": [
@@ -1396,9 +1375,9 @@
         }
       },
       "foreignKeys": {
-        "pg-drizzle_resource_availability_exception_organization_id_pg-drizzle_organization_id_fk": {
-          "name": "pg-drizzle_resource_availability_exception_organization_id_pg-drizzle_organization_id_fk",
-          "tableFrom": "pg-drizzle_resource_availability_exception",
+        "pg-drizzle_resource_availability_exceptions_organization_id_pg-drizzle_organization_id_fk": {
+          "name": "pg-drizzle_resource_availability_exceptions_organization_id_pg-drizzle_organization_id_fk",
+          "tableFrom": "pg-drizzle_resource_availability_exceptions",
           "tableTo": "pg-drizzle_organization",
           "columnsFrom": [
             "organization_id"
@@ -1409,9 +1388,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "pg-drizzle_resource_availability_exception_resource_id_pg-drizzle_resource_id_fk": {
-          "name": "pg-drizzle_resource_availability_exception_resource_id_pg-drizzle_resource_id_fk",
-          "tableFrom": "pg-drizzle_resource_availability_exception",
+        "pg-drizzle_resource_availability_exceptions_resource_id_pg-drizzle_resource_id_fk": {
+          "name": "pg-drizzle_resource_availability_exceptions_resource_id_pg-drizzle_resource_id_fk",
+          "tableFrom": "pg-drizzle_resource_availability_exceptions",
           "tableTo": "pg-drizzle_resource",
           "columnsFrom": [
             "resource_id"
@@ -1424,7 +1403,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "resource_exception_unique": {
+          "name": "resource_exception_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "resource_id",
+            "exception_date"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

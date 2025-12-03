@@ -48,7 +48,7 @@ development_status:
   2-1-resource-creation-and-basic-configuration: review
   2-2-day-specific-availability-patterns: review
   2-3-one-time-availability-exceptions: review
-  2-4-resource-timeline-visualization: backlog
+  2-4-resource-timeline-visualization: in-progress
   epic-2-retrospective: optional
 
   # Epic 3: Task Management & Dependency Engine

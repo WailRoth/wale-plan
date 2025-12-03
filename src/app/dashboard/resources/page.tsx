@@ -3,8 +3,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Navigation } from "~/components/navigation/Navigation";
 import { ResourceTable } from "~/components/resources/ResourceTable";
+import { ResourceTimeline } from "~/components/resources/ResourceTimeline";
 import { useOrganization } from "~/lib/organization/context";
-import { Users, Package } from "lucide-react";
+import { Users, Package, Calendar } from "lucide-react";
 
 export default function ResourcesPage() {
   const { currentOrganization } = useOrganization();
@@ -62,6 +63,22 @@ export default function ResourcesPage() {
             </CardHeader>
             <CardContent>
               <ResourceTable organizationId={currentOrganization.id} />
+            </CardContent>
+          </Card>
+
+          {/* Resource Timeline */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Resource Timeline
+              </CardTitle>
+              <CardDescription>
+                Visualize all resource availability across a calendar timeline to identify gaps and plan assignments
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <ResourceTimeline organizationId={currentOrganization.id} />
             </CardContent>
           </Card>
         </div>
