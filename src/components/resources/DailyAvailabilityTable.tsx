@@ -28,7 +28,7 @@ export function DailyAvailabilityTable({
         isActive: pattern.isActive,
         startTime: pattern.workStartTime || "09:00",
         endTime: pattern.workEndTime || "17:00",
-        hourlyRate: pattern.hourlyRate || undefined,
+        hourlyRate: pattern.hourlyRate ?? undefined,
       };
     }
     // Already DailyAvailabilityPattern format

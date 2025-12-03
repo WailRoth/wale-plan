@@ -8,7 +8,7 @@ export interface ResourceWorkScheduleResponse {
   workStartTime: string | null;
   workEndTime: string | null;
   totalWorkHours: number | null;
-  hourlyRate: string | null;
+  hourlyRate: number | null;
   currency: string;
   createdAt: string;
   updatedAt: string;

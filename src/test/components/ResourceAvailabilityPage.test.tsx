@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ResourceAvailabilityPage } from "~/components/resources/ResourceAvailabilityPage";
-import { trpc } from "~/trpc/react";
+import { api } from "~/trpc/react";
 import { type DailyAvailabilityPattern } from "~/lib/validations/resourcePattern";
 import { type ResourceWorkScheduleResponse } from "~/lib/types/resourcePattern";
 
@@ -25,7 +25,7 @@ const mockUpdateDailyPattern = vi.fn();
 const mockResetToDefaults = vi.fn();
 
 vi.mock("~/trpc/react", () => ({
-  trpc: {
+  api: {
     useQuery: vi.fn(),
     useMutation: vi.fn(() => ({ mutate: mockUpdateDailyPattern })),
     resourcePatterns: {
@@ -246,8 +246,13 @@ describe("ResourceAvailabilityPage", () => {
     });
 
     // Make a change to activate Saturday
-    const saturdayCheckbox = screen.getAllByRole("checkbox", { name: /Actif/i })[5]; // Saturday
-    fireEvent.click(saturdayCheckbox);
+    const checkboxes = screen.getAllByRole("checkbox", { name: /Actif/i });
+    expect(checkboxes.length).toBeGreaterThan(5);
+    const saturdayCheckbox = checkboxes[5]; // Saturday
+    expect(saturdayCheckbox).toBeDefined();
+    if (saturdayCheckbox) {
+      fireEvent.click(saturdayCheckbox);
+    }
 
     // Now save button should be enabled
     await waitFor(() => {

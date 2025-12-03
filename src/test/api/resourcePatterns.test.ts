@@ -2,19 +2,16 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
 import { resourcePatternsRouter } from "~/server/api/routers/resourcePatterns";
-import { createContextInner } from "~/server/api/trpc";
+import { createTRPCContext } from "~/server/api/trpc";
 import { resourceWorkSchedules, resources, organizations, organizationMembers } from "~/server/db/schema";
 import { eq, and } from "drizzle-orm";
 import type { DailyAvailabilityPattern } from "~/lib/validations/resourcePattern";
 
-// Mock data setup
+// Mock data setup - using type any to avoid complex auth session typing
 interface MockContext {
-  session: {
-    user: {
-      id: string;
-    };
-  };
+  session: any;
   db: typeof db;
+  headers: Headers;
 }
 
 describe("resourcePatternsRouter", () => {
@@ -58,11 +55,20 @@ describe("resourcePatternsRouter", () => {
     // Create mock context
     mockContext = {
       session: {
+        session: {
+          id: "test-session-id",
+          userId: mockUserId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          expiresAt: new Date(),
+          token: "test-token",
+        },
         user: {
           id: mockUserId,
         },
       },
       db,
+      headers: new Headers(),
     };
   });
 
@@ -76,7 +82,11 @@ describe("resourcePatternsRouter", () => {
 
   describe("getByResourceId", () => {
     it("should return default patterns when no schedules exist", async () => {
-      const caller = resourcePatternsRouter.createCaller(mockContext);
+      const caller = resourcePatternsRouter.createCaller({
+      headers: new Headers(),
+      db: mockContext.db,
+      session: mockContext.session,
+    });
 
       const result = await caller.getByResourceId({ resourceId: testResource.id });
 
@@ -112,7 +122,11 @@ describe("resourcePatternsRouter", () => {
         });
       }
 
-      const caller = resourcePatternsRouter.createCaller(mockContext);
+      const caller = resourcePatternsRouter.createCaller({
+      headers: new Headers(),
+      db: mockContext.db,
+      session: mockContext.session,
+    });
       const result = await caller.getByResourceId({ resourceId: testResource.id });
 
       expect(result.success).toBe(true);
@@ -126,7 +140,11 @@ describe("resourcePatternsRouter", () => {
     });
 
     it("should throw NOT_FOUND error for non-existent resource", async () => {
-      const caller = resourcePatternsRouter.createCaller(mockContext);
+      const caller = resourcePatternsRouter.createCaller({
+      headers: new Headers(),
+      db: mockContext.db,
+      session: mockContext.session,
+    });
 
       await expect(caller.getByResourceId({ resourceId: 99999 }))
         .rejects.toThrow(TRPCError);
@@ -162,7 +180,11 @@ describe("resourcePatternsRouter", () => {
     ];
 
     it("should successfully update patterns", async () => {
-      const caller = resourcePatternsRouter.createCaller(mockContext);
+      const caller = resourcePatternsRouter.createCaller({
+      headers: new Headers(),
+      db: mockContext.db,
+      session: mockContext.session,
+    });
 
       const result = await caller.updateDailyPattern({
         resourceId: testResource.id,
@@ -185,7 +207,11 @@ describe("resourcePatternsRouter", () => {
     });
 
     it("should throw validation error when no active days", async () => {
-      const caller = resourcePatternsRouter.createCaller(mockContext);
+      const caller = resourcePatternsRouter.createCaller({
+      headers: new Headers(),
+      db: mockContext.db,
+      session: mockContext.session,
+    });
       const allInactivePatterns = validPatterns.map(p => ({ ...p, isActive: false }));
 
       await expect(caller.updateDailyPattern({
@@ -196,7 +222,11 @@ describe("resourcePatternsRouter", () => {
     });
 
     it("should throw validation error for invalid time range", async () => {
-      const caller = resourcePatternsRouter.createCaller(mockContext);
+      const caller = resourcePatternsRouter.createCaller({
+      headers: new Headers(),
+      db: mockContext.db,
+      session: mockContext.session,
+    });
       const invalidPatterns = [
         ...validPatterns.slice(0, 6),
         { dayOfWeek: "sunday" as const, isActive: true, startTime: "17:00", endTime: "09:00", hourlyRate: 50 },
@@ -210,7 +240,11 @@ describe("resourcePatternsRouter", () => {
     });
 
     it("should throw validation error for negative hourly rate", async () => {
-      const caller = resourcePatternsRouter.createCaller(mockContext);
+      const caller = resourcePatternsRouter.createCaller({
+      headers: new Headers(),
+      db: mockContext.db,
+      session: mockContext.session,
+    });
       const invalidPatterns = [
         ...validPatterns.slice(0, 6),
         { dayOfWeek: "sunday" as const, isActive: true, startTime: "09:00", endTime: "17:00", hourlyRate: -10 },
@@ -226,7 +260,11 @@ describe("resourcePatternsRouter", () => {
 
   describe("resetToDefaults", () => {
     it("should successfully reset to default patterns", async () => {
-      const caller = resourcePatternsRouter.createCaller(mockContext);
+      const caller = resourcePatternsRouter.createCaller({
+      headers: new Headers(),
+      db: mockContext.db,
+      session: mockContext.session,
+    });
 
       // First, create some custom patterns
       const customPatterns: DailyAvailabilityPattern[] = [
@@ -265,7 +303,11 @@ describe("resourcePatternsRouter", () => {
     });
 
     it("should throw NOT_FOUND error for non-existent resource", async () => {
-      const caller = resourcePatternsRouter.createCaller(mockContext);
+      const caller = resourcePatternsRouter.createCaller({
+      headers: new Headers(),
+      db: mockContext.db,
+      session: mockContext.session,
+    });
 
       await expect(caller.resetToDefaults({ resourceId: 99999 }))
         .rejects.toThrow(TRPCError);

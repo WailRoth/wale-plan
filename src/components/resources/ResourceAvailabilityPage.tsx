@@ -63,7 +63,7 @@ export function ResourceAvailabilityPage({ className }: ResourceAvailabilityPage
         isActive: p.isActive,
         startTime: p.workStartTime || "09:00",
         endTime: p.workEndTime || "17:00",
-        hourlyRate: p.hourlyRate || undefined,
+        hourlyRate: p.hourlyRate ?? undefined,
       }));
       setCurrentPatterns(normalized);
     }
@@ -157,7 +157,7 @@ export function ResourceAvailabilityPage({ className }: ResourceAvailabilityPage
         isActive: p.isActive,
         startTime: p.workStartTime || "09:00",
         endTime: p.workEndTime || "17:00",
-        hourlyRate: p.hourlyRate || undefined,
+        hourlyRate: p.hourlyRate ?? undefined,
       }));
       setCurrentPatterns(normalized);
       setHasChanges(false);

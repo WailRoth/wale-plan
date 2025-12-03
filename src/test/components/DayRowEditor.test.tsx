@@ -1,5 +1,5 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { DayRowEditor } from "~/components/resources/DayRowEditor";
 import { type DailyAvailabilityPattern } from "~/lib/validations/resourcePattern";
@@ -243,7 +243,7 @@ describe("DayRowEditor", () => {
         workStartTime: "10:00",
         workEndTime: "18:00",
         totalWorkHours: 8.0,
-        hourlyRate: 55.0,
+        hourlyRate: 55.00,  // Changed to number to match updated ResourceWorkScheduleResponse type
         currency: "USD",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

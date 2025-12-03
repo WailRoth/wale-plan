@@ -126,15 +126,15 @@ function mapWorkScheduleToResponse(schedule: typeof resourceWorkSchedules.$infer
   return {
     resourceId: schedule.resourceId,
     dayOfWeek: schedule.dayOfWeek,
-    dayOfWeekName: NUMBER_TO_DAY_NAME[schedule.dayOfWeek],
+    dayOfWeekName: NUMBER_TO_DAY_NAME[schedule.dayOfWeek]!,
     isActive: schedule.isActive,
-    workStartTime: schedule.workStartTime,
-    workEndTime: schedule.workEndTime,
+    workStartTime: (schedule.workStartTime?.substring(0, 5) || null) as string | null, // Format HH:MM
+    workEndTime: (schedule.workEndTime?.substring(0, 5) || null) as string | null, // Format HH:MM
     totalWorkHours: schedule.totalWorkHours ? parseFloat(schedule.totalWorkHours) : null,
     hourlyRate: schedule.hourlyRate ? parseFloat(schedule.hourlyRate) : null,
     currency: schedule.currency || "USD",
-    createdAt: schedule.createdAt,
-    updatedAt: schedule.updatedAt,
+    createdAt: schedule.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: schedule.updatedAt?.toISOString() || new Date().toISOString(),
   };
 }
 
@@ -157,14 +157,13 @@ export const resourcePatternsRouter = createTRPCRouter({
 
         // If no schedules exist, return default patterns
         if (schedules.length === 0) {
-          const defaultPatterns = getDefaultAvailabilityPatterns(resource.organizationId);
+          const defaultPatterns = getDefaultAvailabilityPatterns();
           const defaultSchedules = defaultPatterns.map((pattern, index) => ({
             resourceId: input.resourceId,
-            dayOfWeek: DAY_OF_WEEK_TO_NUMBER[pattern.dayOfWeek],
-            dayOfWeekName: pattern.dayOfWeek,
+            dayOfWeek: DAY_OF_WEEK_TO_NUMBER[pattern.dayOfWeek]!,
             isActive: pattern.isActive,
-            workStartTime: pattern.startTime,
-            workEndTime: pattern.endTime,
+            workStartTime: pattern.startTime.substring(0, 5), // Format HH:MM
+            workEndTime: pattern.endTime.substring(0, 5), // Format HH:MM
             totalWorkHours: pattern.isActive ? validateWorkingHours(pattern.startTime, pattern.endTime).toString() : "0",
             hourlyRate: null,
             currency: "USD",
@@ -172,11 +171,17 @@ export const resourcePatternsRouter = createTRPCRouter({
             updatedAt: new Date().toISOString(),
           }));
 
+          // Convert to proper ResourceWorkScheduleResponse format
+          const responseSchedules = defaultSchedules.map((schedule) => ({
+            ...schedule,
+            dayOfWeekName: NUMBER_TO_DAY_NAME[schedule.dayOfWeek]!,
+          }));
+
           return {
             success: true,
             data: {
               resourceId: input.resourceId,
-              patterns: defaultSchedules,
+              patterns: responseSchedules,
               currency: "USD",
             },
           };
@@ -281,12 +286,11 @@ export const resourcePatternsRouter = createTRPCRouter({
               resourceId: input.resourceId,
               dayOfWeek,
               isActive: pattern.isActive,
-              workStartTime: pattern.isActive ? pattern.startTime : undefined,
-              workEndTime: pattern.isActive ? pattern.endTime : undefined,
-              totalWorkHours: workHours,
-              hourlyRate: pattern.isActive && pattern.hourlyRate ? pattern.hourlyRate : undefined,
+              workStartTime: pattern.isActive ? pattern.startTime.substring(0, 5) : null, // Format HH:MM
+              workEndTime: pattern.isActive ? pattern.endTime.substring(0, 5) : null, // Format HH:MM
+              totalWorkHours: workHours.toString(),
+              hourlyRate: pattern.isActive && pattern.hourlyRate ? pattern.hourlyRate.toString() : null,
               currency: input.currency || "USD",
-              isWorkingDay: pattern.isActive,
             });
           }
         });
@@ -355,7 +359,7 @@ export const resourcePatternsRouter = createTRPCRouter({
         const resource = await validateResourceAccess(ctx, input.resourceId, 'write');
 
         // Get default patterns
-        const defaultPatterns = getDefaultAvailabilityPatterns(resource.organizationId);
+        const defaultPatterns = getDefaultAvailabilityPatterns();
 
         // Begin transaction to reset patterns
         await ctx.db.transaction(async (tx) => {
@@ -372,12 +376,11 @@ export const resourcePatternsRouter = createTRPCRouter({
               resourceId: input.resourceId,
               dayOfWeek,
               isActive: pattern.isActive,
-              workStartTime: pattern.isActive ? pattern.startTime : undefined,
-              workEndTime: pattern.isActive ? pattern.endTime : undefined,
-              totalWorkHours: workHours,
-              hourlyRate: undefined, // Use resource's default hourly rate
+              workStartTime: pattern.isActive ? pattern.startTime.substring(0, 5) : null, // Format HH:MM
+              workEndTime: pattern.isActive ? pattern.endTime.substring(0, 5) : null, // Format HH:MM
+              totalWorkHours: workHours.toString(),
+              hourlyRate: null, // Use resource's default hourly rate
               currency: "USD",
-              isWorkingDay: pattern.isActive,
             });
           }
         });
