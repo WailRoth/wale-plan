@@ -8,7 +8,8 @@ import { ResourcePatternForm } from "./ResourcePatternForm";
 import { ResourceTypeSelector } from "./ResourceTypeSelector";
 import { api } from "~/trpc/react";
 import { toast } from "~/components/ui/toast/use-toast";
-import { Plus } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { GetResourceResponse } from "~/lib/types/resource";
 
 // Define EditableColumn interface for our use case
@@ -28,6 +29,7 @@ interface ResourceTableProps {
 }
 
 export function ResourceTable({ organizationId, className }: ResourceTableProps) {
+  const router = useRouter();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<GetResourceResponse | null>(null);
 
@@ -200,6 +202,21 @@ export function ResourceTable({ organizationId, className }: ResourceTableProps)
       header: "Created",
       accessorKey: "createdAt" as keyof GetResourceResponse,
       cell: (row: GetResourceResponse) => new Date(row.createdAt).toLocaleDateString(),
+    },
+    {
+      header: "Actions",
+      accessorKey: "id" as keyof GetResourceResponse,
+      cell: (row: GetResourceResponse) => (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => router.push(`/dashboard/resources/${row.id}/availability`)}
+          className="h-8 px-3"
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          Paramètres
+        </Button>
+      ),
     },
   ];
 
